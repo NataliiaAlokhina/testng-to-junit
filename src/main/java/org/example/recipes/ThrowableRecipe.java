@@ -8,6 +8,8 @@ import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 
+import java.util.ArrayList;
+
 public class ThrowableRecipe extends Recipe {
     @Override
     public String getDisplayName() {
@@ -16,42 +18,45 @@ public class ThrowableRecipe extends Recipe {
 
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
-        return new TryCatchVisitor();
+        return new ExceptionTestVisitor();
     }
 
-    public static class TryCatchVisitor extends JavaIsoVisitor<ExecutionContext>{
+    public static class TryCatchVisitor extends JavaIsoVisitor<ExecutionContext> {
+        private final String replaceTry = "var throwable = catchThrowable(()->{#{}});";
+        private final JavaTemplate catchThrowable =
+                JavaTemplate.builder(this::getCursor, replaceTry)
+                        .javaParser(() -> JavaParser.fromJavaVersion()
+                                .classpath("assertj-core").build())
+                        .staticImports("org.assertj.core.api.Assertions.*")
+                        .build();
 
-        String codeSnippet = "var throwable = catchThrowable(()->{#{}});";
-
-        private JavaTemplate catchThrowable = JavaTemplate.builder(this::getCursor,codeSnippet)
-                .javaParser(()->JavaParser.fromJavaVersion().classpath("assertj-core").build())
-                .staticImports("org.assertj.core.api.Assertions.*").build();
+        private final String replaceCatch = "assertThat(throwable).isInstanceOf(#{}.class)";
+        private final JavaTemplate assertThrowable = JavaTemplate.builder(this::getCursor, replaceCatch)
+                .javaParser(() -> JavaParser.fromJavaVersion()
+                        .classpath("assertj-core").build())
+                .staticImports("org.assertj.core.api.Assertions.*")
+                .build();
 
         @Override
-        public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext executionContext) {
+        public J.Block visitBlock(J.Block block, ExecutionContext executionContext) {
+            var b = super.visitBlock(block, executionContext);
 
-            // get all annotations on test method
-            var annotationsList = method.getAllAnnotations();
 
-            // check if it contains `@Test(expectedExceptions=)`
-            var expectExceptionAnnotation = annotationsList.stream()
-                    .filter(a->a.getSimpleName().equals("Test"))
-                    .findAny()
-                    .filter(e->e.getSideEffects().toString().contains("expectedExceptions"))
-                            .orElse(null);
-
-            // if yes, replace try block with catchThrowable
-            if(expectExceptionAnnotation!=null){
-                System.out.println("Nothing to do here yet");
-            }
-
-            return super.visitMethodDeclaration(method, executionContext);
+            return b;
         }
 
         @Override
         public J.Try visitTry(J.Try _try, ExecutionContext executionContext) {
 
-            var r = _try.getBody().getStatements();
+            var tryStatements = _try.getBody().getStatements();
+            var expectedTryReplacement = _try.withTemplate(catchThrowable, _try.getCoordinates().replace(), tryStatements);
+
+
+            var catches = _try.getCatches();
+            var expectedCatchReplacements = new ArrayList<>();
+            for (J.Try.Catch aCatch : catches) {
+
+            }
 
 
             return super.visitTry(_try, executionContext);
@@ -64,5 +69,24 @@ public class ThrowableRecipe extends Recipe {
         }
 
 
+    }
+
+    public static class ExceptionTestVisitor extends JavaIsoVisitor<ExecutionContext> {
+        @Override
+        public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext executionContext) {
+
+            // get all annotations on test method
+            var annotationsList = method.getAllAnnotations();
+
+            // check if it contains `@Test(expectedExceptions=)`
+            var expectExceptionAnnotation = annotationsList.stream().map(J.Annotation::toString)
+                    .filter(e -> e.contains("@Test(expectedExceptions =")).findAny().orElse(null);
+
+            // if yes, replace try block with catchThrowable
+            if (expectExceptionAnnotation != null) {
+                doAfterVisit(new TryCatchVisitor());
+            }
+            return super.visitMethodDeclaration(method, executionContext);
+        }
     }
 }

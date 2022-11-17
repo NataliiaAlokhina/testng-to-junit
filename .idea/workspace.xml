@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cc6395b4-6244-40d6-89c9-11f7146402b8" name="Changes" comment="chore(init): initial commit">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/recipes/ThrowableRecipe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/recipes/ThrowableRecipe.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,23 +31,6 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="junit-recipes" type="f1a62948:ProjectNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="junit-recipes" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="junit-recipes" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="build" type="c8890929:TasksNode$1" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="junit-recipes" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="publishing" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -110,7 +95,7 @@
       <recent name="org.example.recipes" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.junit-recipes [clean]">
+  <component name="RunManager" selected="Gradle.ThrowableRecipeTest.categoriesHavingJAssignmentArguments">
     <configuration name="FilterUnitTestFiles" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.recipes.FilterUnitTestFiles" />
       <module name="junit-recipes.main" />
@@ -191,32 +176,14 @@
     </configuration>
     <configuration name="junit-recipes.main" type="QuarkusRunConfigurationType" factoryName="Quarkus">
       <module name="junit-recipes.main" />
-      <QsGradleRunConfiguration>
-        <ExternalSystemSettings>
-          <option name="executionName" />
-          <option name="externalProjectPath" value="$PROJECT_DIR$" />
-          <option name="externalSystemIdString" value="GRADLE" />
-          <option name="scriptParameters" />
-          <option name="taskDescriptions">
-            <list />
-          </option>
-          <option name="taskNames">
-            <list />
-          </option>
-          <option name="vmOptions" />
-        </ExternalSystemSettings>
-        <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-        <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-        <DebugAllEnabled>false</DebugAllEnabled>
-      </QsGradleRunConfiguration>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.junit-recipes [clean]" />
         <item itemvalue="Gradle.ThrowableRecipeTest.categoriesHavingJAssignmentArguments" />
+        <item itemvalue="Gradle.junit-recipes [clean]" />
         <item itemvalue="Gradle.junit-recipes [publishToMavenLocal]" />
         <item itemvalue="Application.FilterUnitTestFiles" />
       </list>
@@ -237,6 +204,7 @@
       <workItem from="1667990670599" duration="19364000" />
       <workItem from="1668087109296" duration="8370000" />
       <workItem from="1668416465760" duration="9020000" />
+      <workItem from="1668601964393" duration="7794000" />
     </task>
     <servers />
   </component>
@@ -259,23 +227,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/org/example/recipes/ThrowableRecipe.java</url>
-          <line>33</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/example/recipes/ThrowableRecipe.java</url>
-          <line>47</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/example/recipes/ThrowableRecipe.java</url>
-          <line>53</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/example/recipes/ThrowableRecipe.java</url>
-          <line>56</line>
-          <option name="timeStamp" value="4" />
+          <line>61</line>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
