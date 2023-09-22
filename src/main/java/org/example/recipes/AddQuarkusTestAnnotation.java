@@ -1,26 +1,37 @@
 package org.example.recipes;
 
-import java.util.Comparator;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.*;
 import org.openrewrite.java.*;
 import org.openrewrite.java.tree.J;
 
+import java.time.Duration;
+import java.util.Comparator;
+
+@Value
+@EqualsAndHashCode(callSuper = false)
 public class AddQuarkusTestAnnotation extends Recipe {
 
 	@Override
 	public String getDisplayName() {
-		return "Add `@QuarkusTest` on test class";
+		return "Add `@QuarkusTest` annotation to test classes";
 	}
 
 	@Override
 	public String getDescription() {
-		return "If class does not have `@QuarkusTest` annotation, this recipe will add annotation and import for it";
+		return "Add `@QuarkusTest` annotation to test classes";
 	}
 
 	@Override
-	protected TreeVisitor<?, ExecutionContext> getVisitor() {
+	public Duration getEstimatedEffortPerOccurrence() {
+		return Duration.ofMinutes(5);
+	}
+
+	@Override
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
 		return new QuarkusTestAnnotationVisitor();
 	}
 
@@ -28,27 +39,24 @@ public class AddQuarkusTestAnnotation extends Recipe {
 
 		private static final String IMPORT_COMPONENT = "io.quarkus.test.junit.QuarkusTest";
 
-		private final JavaTemplate componentAnnotationTemplate = JavaTemplate.builder(this::getCursor, "@QuarkusTest")
-				.javaParser(() -> JavaParser.fromJavaVersion().classpath("quarkus-junit5").build())
-				.imports(IMPORT_COMPONENT).build();
-
 		@Override
 		public J.ClassDeclaration visitClassDeclaration(J.@NotNull ClassDeclaration classDecl,
-				@NotNull ExecutionContext executionContext) {
+				@NotNull ExecutionContext ctx) {
 
 			// get class declaration ACT
-			J.ClassDeclaration cd = super.visitClassDeclaration(classDecl, executionContext);
+			J.ClassDeclaration cd = super.visitClassDeclaration(classDecl, ctx);
 
 			// Check if it does not contain @QuarkusTest annotation
-			if (cd.getAllAnnotations().stream().noneMatch(new AnnotationMatcher("@QuarkusTest")::matches)) {
+			if (cd.getAllAnnotations().isEmpty()) {
 
 				// add import for @QuarkusTest annotation
 				maybeAddImport(IMPORT_COMPONENT);
 
 				// and add annotation to class
-				cd = cd.withTemplate(componentAnnotationTemplate, cd.getCoordinates().addAnnotation(
-						Comparator.comparing(J.Annotation::getSimpleName))); //Annotation is added but not the import
-
+				cd = JavaTemplate.builder("@QuarkusTest")
+						.javaParser(JavaParser.fromJavaVersion().classpath("quarkus-junit5")).imports(IMPORT_COMPONENT)
+						.build().apply(getCursor(),
+								cd.getCoordinates().addAnnotation(Comparator.comparing(J.Annotation::getSimpleName)));
 			}
 			return cd;
 		}

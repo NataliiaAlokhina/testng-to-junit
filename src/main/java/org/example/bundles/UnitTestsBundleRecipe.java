@@ -4,39 +4,36 @@ import org.example.recipes.*;
 import org.openrewrite.*;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.tree.J;
+import org.openrewrite.java.tree.TypeUtils;
 
 public class UnitTestsBundleRecipe extends Recipe {
 
 	@Override
 	public String getDisplayName() {
-		return "TO-DO, TO-DOOO...";
+		return "Unit Tests bundle";
 	}
 
 	@Override
 	public String getDescription() {
-		return "TO-DO, TO-DOOO...";
+		return "Unit Tests bundle";
 	}
 
 	@Override
-	protected TreeVisitor<?, ExecutionContext> getVisitor() {
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
 		return new UnitTestsVisitors();
 	}
 
 	public static class UnitTestsVisitors extends JavaIsoVisitor<ExecutionContext> {
-
 		@Override
-		public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext executionContext) {
+		public J.ClassDeclaration visitClassDeclaration(J.ClassDeclaration classDecl, ExecutionContext ctx) {
 
-			String unitTestSuffix = "Test";
-			String fileName = cu.getSourcePath().getFileName().toString();
-
-			if (fileName.endsWith(unitTestSuffix)) {
-				doAfterVisit(new ReplaceSimpleTestNgAnnotations());
-				doAfterVisit(new ReplaceTestNgAssert());
-				doAfterVisit(new AddQuarkusTestAnnotation());
+			if (classDecl.getName().getSimpleName().endsWith("Test")) {
+				doAfterVisit(new AddQuarkusTestAnnotation().getVisitor());
+				doAfterVisit(new ReplaceSimpleTestNgAnnotations().getVisitor());
+				doAfterVisit(new ReplaceTestNgAssert().getVisitor());
 			}
 
-			return super.visitCompilationUnit(cu, executionContext);
+			return classDecl;
 		}
 	}
 }
