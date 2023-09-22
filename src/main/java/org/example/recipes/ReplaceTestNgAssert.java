@@ -15,7 +15,12 @@ public class ReplaceTestNgAssert extends Recipe {
 	}
 
 	@Override
-	protected TreeVisitor<?, ExecutionContext> getVisitor() {
+	public String getDescription() {
+		return "Replace TestNg assertions with JUnit assertions";
+	}
+
+	@Override
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
 		return new AssertionsVisitor();
 	}
 
@@ -23,7 +28,7 @@ public class ReplaceTestNgAssert extends Recipe {
 
 		public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext executionContext) {
 
-			doAfterVisit(new ChangeType(ORG_TESTNG_ASSERT, ORG_JUNIT_JUPITER_API_ASSERTIONS, false));
+			doAfterVisit(new ChangeType(ORG_TESTNG_ASSERT, ORG_JUNIT_JUPITER_API_ASSERTIONS, false).getVisitor());
 			doAfterVisit(new RemoveImport<>(ORG_TESTNG_ASSERT));
 			doAfterVisit(new AddImport<>(ORG_JUNIT_JUPITER_API_ASSERTIONS, "*", true));
 

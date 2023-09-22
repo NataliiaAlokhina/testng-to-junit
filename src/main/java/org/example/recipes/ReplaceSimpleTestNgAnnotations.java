@@ -38,7 +38,7 @@ public class ReplaceSimpleTestNgAnnotations extends Recipe {
 	}
 
 	@Override
-	protected TreeVisitor<?, ExecutionContext> getVisitor() {
+	public TreeVisitor<?, ExecutionContext> getVisitor() {
 		return new ReplaceSimpleAnnotationsVisitor();
 	}
 
@@ -47,28 +47,31 @@ public class ReplaceSimpleTestNgAnnotations extends Recipe {
 		public J.CompilationUnit visitCompilationUnit(J.CompilationUnit cu, ExecutionContext executionContext) {
 
 			// Test
-			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_TEST, ORG_JUNIT_JUPITER_API_TEST, false));
+			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_TEST, ORG_JUNIT_JUPITER_API_TEST, false).getVisitor());
 			doAfterVisit(new RemoveImport<>(ORG_TESTNG_ANNOTATIONS_TEST));
 			doAfterVisit(new AddImport<>(ORG_JUNIT_JUPITER_API_TEST, "*", true));
 
 			// Before test method
-			doAfterVisit(
-					new ChangeType(ORG_TESTNG_ANNOTATIONS_BEFORE_METHOD, ORG_JUNIT_JUPITER_API_BEFORE_EACH, false));
+			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_BEFORE_METHOD, ORG_JUNIT_JUPITER_API_BEFORE_EACH,
+					false).getVisitor());
 			doAfterVisit(new RemoveImport<>(ORG_TESTNG_ANNOTATIONS_BEFORE_METHOD));
 			doAfterVisit(new AddImport<>(ORG_JUNIT_JUPITER_API_BEFORE_EACH, "*", true));
 
 			// After test method
-			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_AFTER_METHOD, ORG_JUNIT_JUPITER_API_AFTER_EACH, false));
+			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_AFTER_METHOD, ORG_JUNIT_JUPITER_API_AFTER_EACH,
+					false).getVisitor());
 			doAfterVisit(new RemoveImport<>(ORG_TESTNG_ANNOTATIONS_AFTER_METHOD));
 			doAfterVisit(new AddImport<>(ORG_JUNIT_JUPITER_API_AFTER_EACH, "*", true));
 
 			// Before test class
-			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_BEFORE_CLASS, ORG_JUNIT_JUPITER_API_BEFORE_ALL, false));
+			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_BEFORE_CLASS, ORG_JUNIT_JUPITER_API_BEFORE_ALL,
+					false).getVisitor());
 			doAfterVisit(new RemoveImport<>(ORG_TESTNG_ANNOTATIONS_BEFORE_CLASS));
 			doAfterVisit(new AddImport<>(ORG_JUNIT_JUPITER_API_BEFORE_ALL, "*", true));
 
 			// After test class
-			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_AFTER_CLASS, ORG_JUNIT_JUPITER_API_AFTER_ALL, false));
+			doAfterVisit(new ChangeType(ORG_TESTNG_ANNOTATIONS_AFTER_CLASS, ORG_JUNIT_JUPITER_API_AFTER_ALL,
+					false).getVisitor());
 			doAfterVisit(new RemoveImport<>(ORG_TESTNG_ANNOTATIONS_AFTER_CLASS));
 			doAfterVisit(new AddImport<>(ORG_JUNIT_JUPITER_API_AFTER_ALL, "*", true));
 
