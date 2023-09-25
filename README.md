@@ -45,7 +45,7 @@ repositories {
 ## Create gradle task with jUnit runner
 
 This is not end result, you'll need this gradle task only for verifying your changes, will be modified at the end of
-this migration guide. For now at the end of your `build.gradle` file add this task and ypu're ready to migrate unit
+this migration guide. For now at the end of your `build.gradle` file add this task, and you're ready to migrate unit
 tests
 
 ```groovy
@@ -73,7 +73,7 @@ adjust tests annotated with `@Test(expectedExceptions = SomeException.class)`. F
    to `activeRecipe("org.example.bundles.UnitTestsBundleRecipe")`
 3. Call `gradle rewriteDryRun` and wait for results, it will generate patch file
    in `build/reports/rewrite/rewrite.patch` directory
-4. Apply patch, it will add `@QuarkusTest` annotation to your test classes, will replace TestNG annotations and asserts
+4. Apply patch, it will replace TestNG annotations and asserts
    with corresponding jUnit5 methods
 5. Call `gradle compileTestJava`, you'll get failures for exception tests
 6. Time to fix exception tests, unfortunately it is manual work
