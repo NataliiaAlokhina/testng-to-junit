@@ -1,10 +1,10 @@
 package org.example.bundles;
 
-import org.example.recipes.*;
+import org.example.recipes.ReplaceSimpleTestNgAnnotations;
+import org.example.recipes.ReplaceTestNgAssert;
 import org.openrewrite.*;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.tree.J;
-import org.openrewrite.java.tree.TypeUtils;
 
 public class UnitTestsBundleRecipe extends Recipe {
 
@@ -28,7 +28,6 @@ public class UnitTestsBundleRecipe extends Recipe {
 		public J.ClassDeclaration visitClassDeclaration(J.ClassDeclaration classDecl, ExecutionContext ctx) {
 
 			if (classDecl.getName().getSimpleName().endsWith("Test")) {
-				doAfterVisit(new AddQuarkusTestAnnotation().getVisitor());
 				doAfterVisit(new ReplaceSimpleTestNgAnnotations().getVisitor());
 				doAfterVisit(new ReplaceTestNgAssert().getVisitor());
 			}

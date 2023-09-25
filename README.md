@@ -26,7 +26,7 @@ rewrite {
 }
 dependencies {
 	// your code
-	rewrite "org.example.rewrite:recipes:1.0-SNAPSHOT"
+	rewrite "org.example.rewrite:recipes:{version}"
 }
 repositories {
 	// your code
