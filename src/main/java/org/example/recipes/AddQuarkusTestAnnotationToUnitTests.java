@@ -1,19 +1,19 @@
 package org.example.recipes;
 
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import java.time.Duration;
+import java.util.Comparator;
 
 import org.jetbrains.annotations.NotNull;
 import org.openrewrite.*;
 import org.openrewrite.java.*;
 import org.openrewrite.java.tree.J;
 
-import java.time.Duration;
-import java.util.Comparator;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class AddQuarkusTestAnnotation extends Recipe {
+public class AddQuarkusTestAnnotationToUnitTests extends Recipe {
 
 	@Override
 	public String getDisplayName() {
@@ -47,7 +47,7 @@ public class AddQuarkusTestAnnotation extends Recipe {
 			J.ClassDeclaration cd = super.visitClassDeclaration(classDecl, ctx);
 
 			// Check if it does not contain @QuarkusTest annotation
-			if (cd.getAllAnnotations().isEmpty()) {
+			if (cd.getAllAnnotations().isEmpty() && classDecl.getName().getSimpleName().endsWith("Test")) {
 
 				// add import for @QuarkusTest annotation
 				maybeAddImport(IMPORT_COMPONENT);

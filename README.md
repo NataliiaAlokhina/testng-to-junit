@@ -26,7 +26,7 @@ rewrite {
 }
 dependencies {
 	// your code
-	rewrite "org.example.rewrite:recipes:1.0-SNAPSHOT"
+	rewrite "org.example.rewrite:recipes:{version}"
 }
 repositories {
 	// your code
@@ -45,7 +45,7 @@ repositories {
 ## Create gradle task with jUnit runner
 
 This is not end result, you'll need this gradle task only for verifying your changes, will be modified at the end of
-this migration guide. For now at the end of your `build.gradle` file add this task and ypu're ready to migrate unit
+this migration guide. For now at the end of your `build.gradle` file add this task, and you're ready to migrate unit
 tests
 
 ```groovy
@@ -73,10 +73,10 @@ adjust tests annotated with `@Test(expectedExceptions = SomeException.class)`. F
    to `activeRecipe("org.example.bundles.UnitTestsBundleRecipe")`
 3. Call `gradle rewriteDryRun` and wait for results, it will generate patch file
    in `build/reports/rewrite/rewrite.patch` directory
-4. Apply patch, it will add `@QuarkusTest` annotation to your test classes, will replace TestNG annotations and asserts
+4. Apply patch, it will replace TestNG annotations and asserts
    with corresponding jUnit5 methods
 5. Call `gradle compileTestJava`, you'll get failures for exception tests
-6. Time to fix exception tests
+6. Time to fix exception tests, unfortunately it is manual work
 
 #### How to fix exception tests
 
@@ -111,9 +111,17 @@ public class TestClass {
 
 		// then
 		assertEquals(PlatformErrorCode.SERVICE_NOT_WORKING_PROPERLY, exception.getErrorCode());
-		verify(exceptionHandler).getModuleException(any());
+		// some move verify methods which you had before
 	}
 }
 ```
-
+If you want to do it faster than copy-paste, you can create live-template for intelliJ -> https://www.jetbrains.com/help/idea/using-live-templates.html 
+Here is snippet 
+```
+// when
+$CLASS$ exception = org.junit.jupiter.api.Assertions.assertThrows($CLASS$.class, () -> {$METHOD$;});
+// then
+org.junit.jupiter.api.Assertions.assertEquals($ERROR_CODE$, exception.getErrorCode());
+```
+Do not forget remove injection of `PlatformValidator` into your tests class, you don't need it anymore.
 Good luck! 
