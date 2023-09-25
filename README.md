@@ -76,7 +76,7 @@ adjust tests annotated with `@Test(expectedExceptions = SomeException.class)`. F
 4. Apply patch, it will add `@QuarkusTest` annotation to your test classes, will replace TestNG annotations and asserts
    with corresponding jUnit5 methods
 5. Call `gradle compileTestJava`, you'll get failures for exception tests
-6. Time to fix exception tests
+6. Time to fix exception tests, unfortunately it is manual work
 
 #### How to fix exception tests
 
@@ -111,8 +111,17 @@ public class TestClass {
 
 		// then
 		assertEquals(PlatformErrorCode.SERVICE_NOT_WORKING_PROPERLY, exception.getErrorCode());
+		// some move verify methods which you had before
 	}
 }
 ```
-
+If you want to do it faster than copy-paste, you can create live-template for intelliJ -> https://www.jetbrains.com/help/idea/using-live-templates.html 
+Here is snippet 
+```
+// when
+$CLASS$ exception = org.junit.jupiter.api.Assertions.assertThrows($CLASS$.class, () -> {$METHOD$;});
+// then
+org.junit.jupiter.api.Assertions.assertEquals($ERROR_CODE$, exception.getErrorCode());
+```
+Do not forget remove injection of `PlatformValidator` into your tests class, you don't need it anymore.
 Good luck! 
