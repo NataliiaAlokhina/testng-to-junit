@@ -111,7 +111,6 @@ public class TestClass {
 
 		// then
 		assertEquals(PlatformErrorCode.SERVICE_NOT_WORKING_PROPERLY, exception.getErrorCode());
-		verify(exceptionHandler).getModuleException(any());
 	}
 }
 ```
