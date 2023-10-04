@@ -6,16 +6,16 @@ import org.openrewrite.*;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.tree.J;
 
-public class UnitTestsBundleRecipe extends Recipe {
+public class ReplaceTestNGBundle extends Recipe {
 
 	@Override
 	public String getDisplayName() {
-		return "Unit Tests bundle";
+		return "Tests bundle";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Unit Tests bundle";
+		return "Tests bundle";
 	}
 
 	@Override
@@ -27,7 +27,9 @@ public class UnitTestsBundleRecipe extends Recipe {
 		@Override
 		public J.ClassDeclaration visitClassDeclaration(J.ClassDeclaration classDecl, ExecutionContext ctx) {
 
-			if (classDecl.getName().getSimpleName().endsWith("Test")) {
+			if (classDecl.getName().getSimpleName().endsWith("Test") || classDecl.getName().getSimpleName()
+					.endsWith("EmMig") || classDecl.getName().getSimpleName().endsWith("IT") || classDecl.getName()
+					.getSimpleName().endsWith("E2EComp")) {
 				doAfterVisit(new ReplaceSimpleTestNgAnnotations().getVisitor());
 				doAfterVisit(new ReplaceTestNgAssert().getVisitor());
 			}

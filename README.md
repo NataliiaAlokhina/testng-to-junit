@@ -4,10 +4,7 @@
 
 - All your tests migrated to jUnit 5
 - You removed all dependencies to TestNG and `platform:test` module from `quarkus-platform`
-- You don't use anymore `microservice plugin - testing` gradle tasks (deprecated, will be removed soon, during migration
-  plugin still exist)
-- You have your own gradle tasks for each test suite which are using jUnit runner
-- You updated Jenkins file, and it uses your new tasks and still publishing reports as before
+- You will reconfigure `microservice plugin - testing` gradle tasks (what to do with it should be discussed in Arch round)
 
 ## Set up
 
@@ -21,12 +18,21 @@ plugins {
 	id 'org.openrewrite.rewrite' version '6.3.6'
 }
 rewrite {
-	activeRecipe("org.example.bundles.UnitTestsBundleRecipe")
+	activeRecipe("org.example.bundles.ReplaceTestNGBundle")
 	exclusion("**/*.yaml")
 }
 dependencies {
 	// your code
 	rewrite "org.example.rewrite:recipes:{version}"
+    
+    // dependency for integration test
+    // if you're on Quarkus 3 use with jakarta classifier
+	testImplementation ('com.github.database-rider:rider-cdi:1.41.0:jakarta') {
+		exclude group: "stax"
+	}
+    // if you're on Quarkus 2 use regular one 
+	testImplementation 'com.github.database-rider:rider-cdi:1.41.0'
+    
 }
 repositories {
 	// your code
@@ -37,48 +43,41 @@ repositories {
 
 4. We're done with set up for rewrite!
 
-## Don't do those things, or you'll struggle
 
-1. Don't do migration all in bulk, migrate suite by suite and commit after each suite working or more often
-2. TODO: Add some more
+## Overwrite gradle task with jUnit runner
 
-## Create gradle task with jUnit runner
-
-This is not end result, you'll need this gradle task only for verifying your changes, will be modified at the end of
-this migration guide. For now at the end of your `build.gradle` file add this task, and you're ready to migrate unit
-tests
+At the moment of this manual ops testing plugin uses TestNG runner, we will fix it. At the end of your `build.gradle` file add this
 
 ```groovy
-// ============================= NEW TESTING TASKS =============================
-tasks.register('junitTest', Test) {
-
-	description = 'Run junit tests'
-	group = 'awesome migration'
-
-	useJUnitPlatform()
-
-	filter {
-		includeTestsMatching "*Test"
-	}
-}
+/*--------------------------------------------
+Overwrite testing tasks from ops plugin to use jUnit runner instead of TestNG runner
+-------------------------------------------- */
+def testTasks = [
+		'unitTest',
+		'migrationTest',
+		'integrationTest',
+		'componentTest'
+]
+project.tasks
+		.matching({ t -> testTasks.contains(t.name) })
+		.withType(Test.class)
+		.each { task -> task.useJUnitPlatform() }
 ```
-
-## Migrate Unit Test suite
-
-At this suite most work will be done automatically, except "exception tests" (what an irony). You'll need manually
-adjust tests annotated with `@Test(expectedExceptions = SomeException.class)`. Follow the steps
-
+## Get rid of TestNG Annotations
+This recipe will affect only tests files which ends with `Test`, `EmMig`, `IT`, `E2EComp`, other suffixes will be ignored.
 1. Call `gradle clean` in your project
 2. Make sure `rewrite` block in your `build.gradle` is set
-   to `activeRecipe("org.example.bundles.UnitTestsBundleRecipe")`
+   to `activeRecipe("org.example.bundles.ReplaceTestNGBundle")`
 3. Call `gradle rewriteDryRun` and wait for results, it will generate patch file
    in `build/reports/rewrite/rewrite.patch` directory
 4. Apply patch, it will replace TestNG annotations and asserts
    with corresponding jUnit5 methods
-5. Call `gradle compileTestJava`, you'll get failures for exception tests
-6. Time to fix exception tests, unfortunately it is manual work
 
-#### How to fix exception tests
+## Fix compilation for exception tests
+Most tests don't need any changes after this step, except "exception tests" (what an irony). You'll need manually
+adjust tests annotated with `@Test(expectedExceptions = SomeException.class)`. Follow the steps
+1. Call `gradle compileTestJava`, you'll get failures for exception tests
+2. Time to fix exception tests, unfortunately it is manual work
 
 Let's go with example, how it should be reworked
 
@@ -125,3 +124,62 @@ org.junit.jupiter.api.Assertions.assertEquals($ERROR_CODE$, exception.getErrorCo
 ```
 Do not forget remove injection of `PlatformValidator` into your tests class, you don't need it anymore.
 Good luck! 
+
+## Big bang time
+I had not found nice way to do it without complete removal of platform dependencies. So go to your `build.gradle` file and remove this
+```groovy
+dependencies{
+	testImplementation 'org.testng:testng:7.7.0'
+	testImplementation group: 'com.fntsoftware.lib.quarkus', name: 'platform-test', version: "${platformVersion}"
+    
+    // optional, if you don't use it, you don't needed. Feel free to remove
+	testImplementation 'io.rest-assured:rest-assured'
+    
+}
+```
+- Call `gradle clean compileJava compileTestJava`
+- If any of your classes had `extends ApplicationJPAIT` remove this extends, you'll not need it anymore. 
+- If you used class `ArgumentMatcher` from platform, depends on amount of usages or just temporary copy this class into your repo you'll fix it later, or fix it immediately if it is few usages. See Migration tests section to know how. 
+
+## Migrate Unit Test -> *Test suite
+1. After you fixed exception tests and removed dependencies time to run `gradle unitTest`, make sure your test runner works
+2. Works? Cool, unit tests suite migrated. 
+
+## Migrate Migration Test -> *EmMig suite
+1. Add `@QuarkusTest` annotation to test class
+2. Remove `extends ApplicationJPAIT` from test class definition
+3. Add to class body `@Inject EntityManager em;`
+4. Run `gradle migrationTest`
+5. Suite migrated. 
+
+## Migrate Integration test -> *IT suite
+1. Make sure that you have DBRider dependency.
+2. Add annotations to your test classes
+```java
+import com.github.database.rider.cdi.api.DBRider;
+import com.github.database.rider.core.api.dataset.DataSet;
+
+import io.quarkus.test.TestTransaction;
+import io.quarkus.test.junit.QuarkusTest;
+
+@QuarkusTest
+@DBRider
+@DataSet(value = "servicerepositoryimplemit.xml")
+@TestTransaction
+public class ServiceRepositoryImplEmIT {}
+```
+3. Remove `META-INF` package with `orm.xml` and `persistence.xml` from `src/test/resources` if it exists
+4. Add to `src/test/resources` new file `dbunit.yml` with content
+```yaml
+cacheConnection: false
+caseInsensitiveStrategy: LOWERCASE
+alwaysCleanBefore: true
+properties:
+  allowEmptyFields: true
+```
+5. Call `gradle IntegrationTest`
+6. Suite migrated
+
+## Migrate Component Test -> *E2EComp suite 
+To be done later.... 
+
