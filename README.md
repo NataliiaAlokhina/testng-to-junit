@@ -183,3 +183,9 @@ properties:
 ## Migrate Component Test -> *E2EComp suite 
 To be done later.... 
 
+## Clean up steps
+1. Remove maven repositories from `build.gradle`
+2. Remove rewrite plugin and its configuration
+3. Run everything on Jenkins and check if you're happy
+4. Done.
+
